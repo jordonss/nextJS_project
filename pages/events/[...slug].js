@@ -1,18 +1,38 @@
 import { useRouter } from "next/router";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+import useSWR from "swr";
 
-import { getFilteredEvents } from "../../dummy-data";
 import EventList from "../../components/events/event-list";
 import ResultsTitle from "../../components/events/results-title";
 import Button from "../../components/ui/button";
 import ErrorAlert from "../../components/ui/error-alert";
 
 function FilteredEventsPage() {
+  const [loadedEvents, setLoadedEvents] = useState();
   const router = useRouter();
 
   const filterData = router.query.slug;
 
-  if (!filterData) {
+  const { data, error } = useSWR(
+    "https://next-js-9114b-default-rtdb.europe-west1.firebasedatabase.app/events.json",
+    (url) => fetch(url).then((res) => res.json())
+  );
+
+  useEffect(() => {
+    if (data) {
+      const events = [];
+
+      for (const key in data) {
+        events.push({
+          id: key,
+          ...data[key],
+        });
+      }
+      setLoadedEvents(events);
+    }
+  }, [data]);
+
+  if (!loadedEvents) {
     return <p className="center">Loading...</p>;
   }
 
@@ -28,7 +48,8 @@ function FilteredEventsPage() {
     numYear > 2030 ||
     numYear < 2021 ||
     numMonths > 12 ||
-    numMonths < 1
+    numMonths < 1 ||
+    error
   ) {
     return (
       <Fragment>
@@ -42,12 +63,15 @@ function FilteredEventsPage() {
     );
   }
 
-  const fileteredEvents = getFilteredEvents({
-    year: numYear,
-    month: numMonths,
+  const filteredEvents = loadedEvents.filter((event) => {
+    const eventDate = new Date(event.date);
+    return (
+      eventDate.getFullYear() === numYear &&
+      eventDate.getMonth() === numMonths - 1
+    );
   });
 
-  if (!fileteredEvents || fileteredEvents.length === 0) {
+  if (!filteredEvents || filteredEvents.length === 0) {
     return (
       <Fragment>
         <ErrorAlert>
@@ -65,7 +89,7 @@ function FilteredEventsPage() {
   return (
     <Fragment>
       <ResultsTitle date={date} />
-      <EventList items={fileteredEvents} />
+      <EventList items={filteredEvents} />
     </Fragment>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Button from "../ui/button";
 import DateIcon from "../icons/date-icon";
 import AddressIcon from "../icons/address-icon";
