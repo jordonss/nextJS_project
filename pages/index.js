@@ -1,15 +1,20 @@
-import Head from "next/head";
+import Head from 'next/head';
 
-import EventList from "../components/events/event-list";
-import { getFeaturedEvents } from "../helpers/api-util";
+import { getFeaturedEvents } from '../helpers/api-util';
+import EventList from '../components/events/event-list';
+import NewsletterRegistration from '../components/input/newsletter-registration';
 
 function HomePage(props) {
   return (
     <div>
       <Head>
-        <title>Next Events</title>
-        <meta name="description" content="A lot of events"></meta>
+        <title>NextJS Events</title>
+        <meta
+          name='description'
+          content='Find a lot of great events that allow you to evolve...'
+        />
       </Head>
+      <NewsletterRegistration />
       <EventList items={props.events} />
     </div>
   );
